@@ -1,17 +1,16 @@
 using UrlShortener.WebApi.Entities.Shorten;
 using UrlShortener.WebApi.Helpers;
+using UrlShortener.WebApi.Repositories.Interfaces;
 using UrlShortener.WebApi.Services.Interfaces;
 
 namespace UrlShortener.WebApi.Services;
 
 public class UrlShortenerService(
     ILogger<UrlShortenerService> logger,
-    IHttpContextAccessor httpContextAccessor) : IUrlShortenerService
+    IHttpContextAccessor httpContextAccessor,
+    IShortenRepository shortenRepository) : IUrlShortenerService
 {
-    private static readonly IList<ShortenEntity> ShortenedUrls = new List<ShortenEntity>();
-
-
-    public Uri ShortenUrl(string longUrl)
+    public async Task<Uri> ShortenUrlAsync(string longUrl)
     {
         const long minimalId = 15_000_000;
         ArgumentNullException.ThrowIfNull(longUrl);
@@ -24,27 +23,28 @@ public class UrlShortenerService(
 
         var baseUrl = GetBaseUrl();
 
-        var shorten = ShortenedUrls.FirstOrDefault(x => x.LongUrl == uri.ToString());
+        var shorten = await shortenRepository.GetByLongUrlAsync(longUrl);
         if (shorten is not null)
         {
             logger.LogInformation("URL already shortened: {Url}", longUrl);
             return new Uri(baseUrl, shorten.ShortCode);
         }
 
-        var id = ShortenedUrls.Count + minimalId;
+        var nextId = await shortenRepository.GetNextIdAsync();
+        var id = nextId + minimalId;
         var newUrl = Base62Helper.Encode(id);
         var entity = new ShortenEntity(uri.ToString(), id, newUrl);
-        ShortenedUrls.Add(entity);
+        await shortenRepository.AddAsync(entity);
         logger.LogInformation("URL shortened: {Url} to {ShortUrl}", longUrl, newUrl);
         return new Uri(baseUrl, newUrl);
     }
 
-    public Uri? GetLongUrl(string shortCode)
+    public async Task<Uri?> GetLongUrlAsync(string shortCode)
     {
         ArgumentNullException.ThrowIfNull(shortCode);
 
         var hashId = Base62Helper.Decode(shortCode);
-        var entity = ShortenedUrls.FirstOrDefault(x => x.HashId == hashId);
+        var entity = await shortenRepository.GetByShortCodeAsync(shortCode);
         if (entity != null)
         {
             logger.LogInformation("Redirecting short URL {ShortUrl} to {LongUrl}", hashId, entity.LongUrl);

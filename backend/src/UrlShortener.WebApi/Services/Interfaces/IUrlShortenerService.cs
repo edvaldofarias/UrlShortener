@@ -2,7 +2,7 @@ namespace UrlShortener.WebApi.Services.Interfaces;
 
 public interface IUrlShortenerService
 {
-    public Uri ShortenUrl(string longUrl);
-    
-    public Uri? GetLongUrl(string shortCode);
+    public Task<Uri> ShortenUrlAsync(string longUrl);
+
+    public Task<Uri?> GetLongUrlAsync(string shortCode);
 }

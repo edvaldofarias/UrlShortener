@@ -8,33 +8,33 @@ public class HomeController(
     IUrlShortenerService shortenerService) : ControllerBase
 {
     [HttpGet("/{shortUrl}")]
-    public IActionResult Index(string shortUrl)
+    public async Task<IActionResult> Index(string shortUrl)
     {
         try
         {
-            var longUrl = shortenerService.GetLongUrl(shortUrl);
+            var longUrl = await shortenerService.GetLongUrlAsync(shortUrl);
             if (longUrl is not null) 
                 return Redirect(longUrl.ToString());
             return NotFound();
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error occured");
+            logger.LogError(e, "An error occurred");
             return StatusCode(500, "An internal server error occurred.");
         }
     }
 
     [HttpPost("api/shorten")]
-    public IActionResult Shorten([FromBody] string url)
+    public async Task<IActionResult> Shorten([FromBody] string url)
     {
         try
         {
-            var newUrl = shortenerService.ShortenUrl(url);
+            var newUrl = await shortenerService.ShortenUrlAsync(url);
             return Created(newUrl, newUrl);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error occured");
+            logger.LogError(e, "An error occurred");
             return StatusCode(500, "An internal server error occurred.");
         }
     }

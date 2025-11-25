@@ -20,6 +20,7 @@ Nesta primeira versão, os dados são armazenados **em memória** usando uma est
 
 1. **Encurtamento de URL**: dado um URL longo, retornar um URL muito mais curto.
 2. **Redirecionamento de URL**: dado um URL curto, redirecionar para o URL original.
+3. **Geração de QR Code**: gerar um QR code para a URL encurtada.
 
 ### Requisitos não funcionais (cenário alvo para estudo)
 
@@ -30,6 +31,14 @@ Nesta primeira versão, os dados são armazenados **em memória** usando uma est
 5. Comprimento médio das URLs armazenadas: **100 bytes**.
 6. URLs devem ser armazenadas por, no mínimo, **10 anos**.
 7. Sistema projetado para alta disponibilidade (**24/7**).
+8. Latência máxima aceitável para redirecionamento: **100 ms**.
+9. Sistema deve ser escalável horizontalmente.
+10. Considerar estratégias para evitar geração de URLs duplicadas.
+11. Considerar estratégias para limpeza de URLs expiradas ou não utilizadas.
+12. Gerar métricas de uso (número de acessos por URL, URLs mais acessadas, etc.).
+13. Implementar logs para monitoramento e auditoria.
+14. Gerar Qr codes para as URLs encurtadas.
+15. Documentar a API usando Swagger/OpenAPI.
 
 Na primeira versão, esses requisitos são considerados principalmente **conceituais**, servindo de base para as próximas etapas de evolução do projeto.
 
@@ -39,7 +48,7 @@ Na primeira versão, esses requisitos são considerados principalmente **conceit
 
 - **Linguagem:** C#
 - **Runtime:** .NET (ASP.NET Core Web API)
-- **Armazenamento inicial:** estrutura estática em memória (ex.: `Dictionary<string, string>`)
+- **Armazenamento inicial:** estrutura estática em memória.
 - **Codificação:** Base62 (apenas 0–9, A–Z, a–z) para gerar códigos curtos
 
 ---
@@ -53,12 +62,13 @@ UrlShortener/
  ├─ Controllers/
  │   └─ UrlsController.cs
  ├─ Services/
- │   └─ UrlShorteningService.cs      // regra de negócio (Base62, geração de código, etc.)
- ├─ Models/
- │   ├─ ShortenUrlRequest.cs         // DTO de entrada
- │   └─ ShortenUrlResponse.cs        // DTO de saída
- ├─ Storage/
- │   └─ InMemoryUrlStore.cs          // classe estática com dicionário em memória
+ │   └─ UrlShorteningService.cs      // regra de negócio (acesso ao repositório, geração de código, etc.)
+ ├─ Helpers/
+ │   └─ Base62Encoder.cs               // codificação Base62
+ ├─ Entities/
+ │   └─ Shorten/ShortenEntity.cs         // Entidade de domínio
+ ├─ Repositories/
+ │   └─ Shorten/ShortenRepository.cs       // acesso a dados (in-memory nesta versão)
  ├─ Program.cs
  └─ README.md
 

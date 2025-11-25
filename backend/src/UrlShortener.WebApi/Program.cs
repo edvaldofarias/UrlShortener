@@ -1,3 +1,5 @@
+using UrlShortener.WebApi.Repositories;
+using UrlShortener.WebApi.Repositories.Interfaces;
 using UrlShortener.WebApi.Services;
 using UrlShortener.WebApi.Services.Interfaces;
 
@@ -11,6 +13,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUrlShortenerService, UrlShortenerService>();
+builder.Services.AddScoped<IShortenRepository, ShortenRepository>();
 
 var app = builder.Build();
 

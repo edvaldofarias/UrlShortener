@@ -26,14 +26,14 @@ public class HomeControllerTest
     [InlineData("abc123", "http://example.com")]
     [InlineData("xyz789", "https://www.test.com/page")]
     [InlineData("1a2b3c", "http://localhost/resource")]
-    public void Index_ValidShortUrl_ReturnsRedirect(string shortUrl, string returnUrl)
+    public async Task Index_ValidShortUrl_ReturnsRedirect(string shortUrl, string returnUrl)
     {
         // Arrange
         var longUrl = new Uri(returnUrl);
-        _shortenerService.Setup(s => s.GetLongUrl(shortUrl)).Returns(longUrl);
+        _shortenerService.Setup(s => s.GetLongUrlAsync(shortUrl)).ReturnsAsync(longUrl);
 
         // Act
-        var result = _controller.Index(shortUrl);
+        var result = await _controller.Index(shortUrl);
 
         // Assert
         var redirectResult = Assert.IsType<Microsoft.AspNetCore.Mvc.RedirectResult>(result);
@@ -44,14 +44,14 @@ public class HomeControllerTest
     /// Verifica que quando o short code não existe o resultado é NotFound.
     /// </summary>
     [Fact]
-    public void Index_InvalidShortUrl_ReturnsNotFound()
+    public async Task Index_InvalidShortUrl_ReturnsNotFound()
     {
         // Arrange
         var shortUrl = "nonexistent";
-        _shortenerService.Setup(s => s.GetLongUrl(shortUrl)).Returns((Uri?)null);
+        _shortenerService.Setup(s => s.GetLongUrlAsync(shortUrl)).ReturnsAsync((Uri?)null);
 
         // Act
-        var result = _controller.Index(shortUrl);
+        var result = await _controller.Index(shortUrl);
 
         // Assert
         Assert.IsType<Microsoft.AspNetCore.Mvc.NotFoundResult>(result);
@@ -61,14 +61,14 @@ public class HomeControllerTest
     /// Verifica que uma exceção do serviço resulta em erro 500 (Internal Server Error).
     /// </summary>
     [Fact]
-    public void Index_ServiceThrowsException_ReturnsInternalServerError()
+    public async Task Index_ServiceThrowsException_ReturnsInternalServerError()
     {
         // Arrange
         var shortUrl = "errorUrl";
-        _shortenerService.Setup(s => s.GetLongUrl(shortUrl)).Throws(new Exception("Service error"));
+        _shortenerService.Setup(s => s.GetLongUrlAsync(shortUrl)).ThrowsAsync(new Exception("Service error"));
 
         // Act
-        var result = _controller.Index(shortUrl);
+        var result = await _controller.Index(shortUrl);
 
         // Assert
         var statusCodeResult = Assert.IsType<Microsoft.AspNetCore.Mvc.ObjectResult>(result);
@@ -82,14 +82,14 @@ public class HomeControllerTest
     [InlineData("http://example.com", "http://short.ly/abc123")]
     [InlineData("https://www.test.com/page", "http://short.ly/xyz789")]
     [InlineData("http://localhost/resource", "http://short.ly/1a2b3c")]
-    public void Shorten_ValidUrl_ReturnsCreated(string url, string returnUrl)
+    public async Task Shorten_ValidUrl_ReturnsCreated(string url, string returnUrl)
     {
         // Arrange
         var shortenedUrl = new Uri(returnUrl);
-        _shortenerService.Setup(s => s.ShortenUrl(url)).Returns(shortenedUrl);
+        _shortenerService.Setup(s => s.ShortenUrlAsync(url)).ReturnsAsync(shortenedUrl);
 
         // Act
-        var result = _controller.Shorten(url);
+        var result = await _controller.Shorten(url);
 
         // Assert
         var createdResult = Assert.IsType<Microsoft.AspNetCore.Mvc.CreatedResult>(result);
@@ -100,14 +100,14 @@ public class HomeControllerTest
     /// Verifica que quando o serviço lança exceção no encurtamento, o controlador retorna erro 500.
     /// </summary>
     [Fact]
-    public void Shorten_ServiceThrowsException_ReturnsInternalServerError()
+    public async Task Shorten_ServiceThrowsException_ReturnsInternalServerError()
     {
         // Arrange
         const string url = "http://error.com";
-        _shortenerService.Setup(s => s.ShortenUrl(url)).Throws(new Exception("Service error"));
+        _shortenerService.Setup(s => s.ShortenUrlAsync(url)).ThrowsAsync(new Exception("Service error"));
 
         // Act
-        var result = _controller.Shorten(url);
+        var result = await _controller.Shorten(url);
 
         // Assert
         var statusCodeResult = Assert.IsType<Microsoft.AspNetCore.Mvc.ObjectResult>(result);
