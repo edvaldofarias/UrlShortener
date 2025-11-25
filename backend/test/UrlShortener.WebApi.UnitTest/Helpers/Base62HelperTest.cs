@@ -2,8 +2,12 @@ using UrlShortener.WebApi.Helpers;
 
 namespace UrlShortener.WebApi.UnitTest.Helpers;
 
+[Trait("Base62Helper", "Helpers Unit")]
 public sealed class Base62HelperTest
 {
+    /// <summary>
+    /// Deve retornar o short code esperado ao codificar o hashId fornecido.
+    /// </summary>
     [Theory]
     [InlineData(0, "0")]
     [InlineData(120, "1w")]
@@ -17,6 +21,9 @@ public sealed class Base62HelperTest
         Assert.Equal(expectedShortCode, shortCode);
     }
 
+    /// <summary>
+    /// Deve retornar o hashId esperado ao decodificar o short code fornecido.
+    /// </summary>
     [Theory]
     [InlineData("0", 0)]
     [InlineData("1w", 120)]

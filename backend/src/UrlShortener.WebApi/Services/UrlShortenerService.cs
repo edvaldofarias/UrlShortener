@@ -13,6 +13,7 @@ public class UrlShortenerService(
 
     public Uri ShortenUrl(string longUrl)
     {
+        const long minimalId = 15_000_000;
         ArgumentNullException.ThrowIfNull(longUrl);
 
         if (!(Uri.TryCreate(longUrl, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme ==  Uri.UriSchemeHttps)))
@@ -30,7 +31,7 @@ public class UrlShortenerService(
             return new Uri(baseUrl, shorten.ShortCode);
         }
 
-        var id = ShortenedUrls.Count + 15_000_000;
+        var id = ShortenedUrls.Count + minimalId;
         var newUrl = Base62Helper.Encode(id);
         var entity = new ShortenEntity(uri.ToString(), id, newUrl);
         ShortenedUrls.Add(entity);
