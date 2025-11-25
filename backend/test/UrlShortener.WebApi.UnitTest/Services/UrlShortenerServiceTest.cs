@@ -120,4 +120,62 @@ public class UrlShortenerServiceTest
         // Assert
         Assert.Equal(firstResult, secondResult);
     }
+    
+    
+    /// <summary>
+    /// Deve retornar null ao tentar obter uma URL longa para um short code inexistente.
+    /// </summary>
+    [Fact]
+    public void GetLongUrl_NonExistentShortCode_ReturnsNull()
+    {
+        // Arrange
+        var nonExistentShortCode = "nonexistent";
+
+        // Act
+        var result = _service.GetLongUrl(nonExistentShortCode);
+
+        // Assert
+        Assert.Null(result);
+    }
+    
+    /// <summary>
+    /// Deve lançar uma exceção ao tentar obter uma URL longa com um short code nulo.
+    /// </summary>
+    [Fact]
+    public void GetLongUrl_NullShortCode_ThrowsException()
+    {
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() => _service.GetLongUrl(null!));
+        Assert.Equal("Value cannot be null. (Parameter 'shortCode')", exception.Message);
+    }
+
+    /// <summary>
+    /// Deve retornar a URL longa correta ao fornecer um short code existente.
+    /// </summary>
+    [Theory]
+    [InlineData("http://example.com/some/long/url")]
+    [InlineData("https://www.test.com/path/to/resource?query=param")]
+    [InlineData("http://localhost:8080/page")]
+    public void GetLongUrl_ExistingShortCode_ReturnsLongUrl(string longUrl)
+    {
+        // Arrange
+        var httpContext = new DefaultHttpContext
+        {
+            Request =
+            {
+                Scheme = "http",
+                Host = new HostString("localhost", 5000)
+            }
+        };
+        _httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+        var shortenedUri = _service.ShortenUrl(longUrl);
+        var shortCode = shortenedUri.Segments.Last();
+
+        // Act
+        var result = _service.GetLongUrl(shortCode);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(longUrl, result.ToString());
+    }
 }
