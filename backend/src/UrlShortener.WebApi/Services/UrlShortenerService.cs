@@ -22,20 +22,21 @@ public class UrlShortenerService(
         }
 
         var baseUrl = GetBaseUrl();
+        var urlComplete = uri.ToString();
 
-        var shorten = await shortenRepository.GetByLongUrlAsync(longUrl);
+        var shorten = await shortenRepository.GetByLongUrlAsync(urlComplete);
         if (shorten is not null)
         {
-            logger.LogInformation("URL already shortened: {Url}", longUrl);
+            logger.LogInformation("URL already shortened: {Url}", urlComplete);
             return new Uri(baseUrl, shorten.ShortCode);
         }
 
         var nextId = await shortenRepository.GetNextIdAsync();
         var id = nextId + minimalId;
         var newUrl = Base62Helper.Encode(id);
-        var entity = new ShortenEntity(uri.ToString(), id, newUrl);
+        var entity = new ShortenEntity(urlComplete, id, newUrl);
         await shortenRepository.AddAsync(entity);
-        logger.LogInformation("URL shortened: {Url} to {ShortUrl}", longUrl, newUrl);
+        logger.LogInformation("URL shortened: {Url} to {ShortUrl}", urlComplete, newUrl);
         return new Uri(baseUrl, newUrl);
     }
 

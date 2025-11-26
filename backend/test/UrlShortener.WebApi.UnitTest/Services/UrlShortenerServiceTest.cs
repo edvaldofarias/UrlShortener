@@ -76,6 +76,7 @@ public class UrlShortenerServiceTest
     [InlineData("http://example.com/some/long/url")]
     [InlineData("https://www.test.com/path/to/resource?query=param")]
     [InlineData("http://localhost:8080/page")]
+    [InlineData("https://www.test.com")]
     public async Task ShortenUrl_ValidUrlFormat_ReturnsNewUrl(string url)
     {
         // Arrange
@@ -106,6 +107,7 @@ public class UrlShortenerServiceTest
     [InlineData("http://example.com/some/long/url")]
     [InlineData("https://www.test.com/path/to/resource?query=param")]
     [InlineData("http://localhost:8080/page")]
+    [InlineData("https://www.test.com")]
     public async Task ShortenUrl_ValidUrlFormat_ReturnsSameUrlOnMultipleCalls(string url)
     {
         // Arrange
@@ -117,13 +119,15 @@ public class UrlShortenerServiceTest
                 Host = new HostString("localhost", 5000)
             }
         };
+        var urlComplete = new Uri(url).ToString();
+        
         _httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
-        _shortenRepository.Setup(x => x.GetByLongUrlAsync(url)).ReturnsAsync(default(ShortenEntity?));
+        _shortenRepository.Setup(x => x.GetByLongUrlAsync(urlComplete)).ReturnsAsync(default(ShortenEntity?));
         _shortenRepository.Setup(x => x.GetNextIdAsync()).ReturnsAsync(1);
 
         // Act
         var firstResult = await _service.ShortenUrlAsync(url);
-        _shortenRepository.Setup(x => x.GetByLongUrlAsync(url)).ReturnsAsync(new ShortenEntity(url, 1, firstResult.AbsolutePath));
+        _shortenRepository.Setup(x => x.GetByLongUrlAsync(urlComplete)).ReturnsAsync(new ShortenEntity(urlComplete, 1, firstResult.AbsolutePath));
         var secondResult = await _service.ShortenUrlAsync(url);
 
         // Assert
@@ -163,12 +167,12 @@ public class UrlShortenerServiceTest
     /// Deve retornar a URL longa correta ao fornecer um short code existente.
     /// </summary>
     [Theory]
-    [InlineData("http://example.com/some/long/url")]
-    [InlineData("https://www.test.com/path/to/resource?query=param")]
-    [InlineData("http://localhost:8080/page")]
+    [InlineData("http://example.com/Adasd23")]
+    [InlineData("https://www.test.com/cba321")] 
+    [InlineData("http://localhost:8080/abc123")]
+    [InlineData("https://www.test.com/abc123")]
     public async Task GetLongUrl_ExistingShortCode_ReturnsLongUrl(string longUrl)
-    {
-        // Arrange
+    {        // Arrange
         var httpContext = new DefaultHttpContext
         {
             Request =
