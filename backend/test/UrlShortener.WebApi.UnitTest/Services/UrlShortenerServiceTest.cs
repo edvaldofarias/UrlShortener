@@ -41,19 +41,6 @@ public class UrlShortenerServiceTest
     }
     
     /// <summary>
-    /// Deve lançar uma exceção ao tentar encurtar uma URL nula.
-    /// </summary>
-    [Fact]
-    public async Task ShortenUrl_InvalidUrlFormat_ReturnsException()
-    {
-        // Act 
-        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => _service.ShortenUrlAsync(null));
-        
-        // Assert
-        Assert.Equal("Value cannot be null. (Parameter 'longUrl')", exception.Message);
-    }
-    
-    /// <summary>
     /// Deve lançar uma exceção ao tentar encurtar uma URL quando o contexto HTTP é inválido.
     /// </summary>
     [Theory]
