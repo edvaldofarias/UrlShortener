@@ -36,5 +36,3 @@ URL shortener em .NET e com Angular com foco em alta escala, performance e arqui
 15. Documentar a API usando Swagger/OpenAPI.
 
 Na primeira versão, esses requisitos são considerados principalmente **conceituais**, servindo de base para as próximas etapas de evolução do projeto.
-
----
