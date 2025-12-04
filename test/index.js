@@ -26,7 +26,7 @@ export let options = {
         },
         read_url: {
             executor: 'per-vu-iterations',
-            vus: 10000,
+            vus: 1000,
             iterations: 30,
             startTime: '15s',
             maxDuration: '10m',
