@@ -10,8 +10,8 @@ export function setup() {
   const url = BASE_URL + '/api/shorten';
   const params = { headers: { 'Content-Type': 'application/json' } };
 
-  for (let i = 0; i < iterations; i++) { // ajuste conforme necessário
-    const payload = JSON.stringify("https://seed" + Math.floor(Math.random() * (iterations * 10)) + ".com");
+  for (let i = 0; i < iterations; i++) {
+    const payload = JSON.stringify("https://test"+ Math.floor(Math.random() * (iterations * 10)) + "seed" + Math.floor(Math.random() * (iterations * 10)) + ".com");
     let res = http.post(url, payload, params);
     if (res.status === 201 && res.body) {
       seed.push(res.body.replace(/"/g, ''));

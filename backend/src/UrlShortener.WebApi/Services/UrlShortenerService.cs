@@ -1,6 +1,6 @@
 using UrlShortener.WebApi.Entities.Shorten;
 using UrlShortener.WebApi.Helpers;
-using UrlShortener.WebApi.Repositories.Interfaces;
+using UrlShortener.WebApi.Infra.Repositories.Interfaces;
 using UrlShortener.WebApi.Services.Interfaces;
 
 namespace UrlShortener.WebApi.Services;
@@ -8,14 +8,15 @@ namespace UrlShortener.WebApi.Services;
 public class UrlShortenerService(
     ILogger<UrlShortenerService> logger,
     IHttpContextAccessor httpContextAccessor,
-    IShortenRepository shortenRepository) : IUrlShortenerService
+    IShortenRepository shortenRepository,
+    ISequenceRepository sequenceRepository) : IUrlShortenerService
 {
     public async Task<Uri> ShortenUrlAsync(string longUrl)
     {
-        const long minimalId = 15_000_000;
         ArgumentNullException.ThrowIfNull(longUrl);
 
-        if (!(Uri.TryCreate(longUrl, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme ==  Uri.UriSchemeHttps)))
+        if (!(Uri.TryCreate(longUrl, UriKind.Absolute, out var uri) &&
+              (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)))
         {
             logger.LogWarning("Invalid URL provided for shortening: {Url}", longUrl);
             throw new ArgumentException("Invalid URL to shorten.", nameof(longUrl));
@@ -31,10 +32,11 @@ public class UrlShortenerService(
             return new Uri(baseUrl, shorten.ShortCode);
         }
 
-        var nextId = await shortenRepository.GetNextIdAsync();
-        var id = nextId + minimalId;
-        var newUrl = Base62Helper.Encode(id);
-        var entity = new ShortenEntity(urlComplete, id, newUrl);
+        const string sequenceName = "Shorten_HashId_Seq";
+        var nextId = await sequenceRepository.GetNextSequenceValueAsync(sequenceName);
+        var newUrl = Base62Helper.Encode(nextId);
+        var entity = new Shorten(urlComplete, nextId, newUrl);
+        
         await shortenRepository.AddAsync(entity);
         logger.LogInformation("URL shortened: {Url} to {ShortUrl}", urlComplete, newUrl);
         return new Uri(baseUrl, newUrl);

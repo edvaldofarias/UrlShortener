@@ -11,7 +11,24 @@ services:
       resources:
         reservations:
           cpus: "0.50"
-          memory: 64M    
+          memory: 256M
         limits:
           cpus: "1"
-          memory: 128M
+          memory: 512M
+          
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=urlshortener
+      - POSTGRES_PASSWORD=YGonTxtRKV9cf83na6Pb0jI9qc4weJ
+      - POSTGRES_DB=urlshortenerdb
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        reservations:
+          cpus: "1.00"
+          memory: 1G
+        limits:
+          cpus: "1.50"
+          memory: 2G
