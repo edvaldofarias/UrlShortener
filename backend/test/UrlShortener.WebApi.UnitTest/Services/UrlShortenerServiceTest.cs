@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using UrlShortener.WebApi.Entities.Shorten;
-using UrlShortener.WebApi.Repositories.Interfaces;
+using UrlShortener.WebApi.Infra.Repositories.Interfaces;
 using UrlShortener.WebApi.Services;
 
 namespace UrlShortener.WebApi.UnitTest.Services;
@@ -12,6 +12,7 @@ public class UrlShortenerServiceTest
 {
     private readonly UrlShortenerService _service;
     private readonly Mock<ILogger<UrlShortenerService>> _logger = new();
+    private readonly Mock<ISequenceRepository> _sequenceRepository = new();
     private readonly Mock<IHttpContextAccessor> _httpContextAccessor = new();
     private readonly Mock<IShortenRepository> _shortenRepository = new();
 
@@ -20,7 +21,8 @@ public class UrlShortenerServiceTest
         var httpContextAccessor = _httpContextAccessor.Object;
         var logger = _logger.Object;
         var repository = _shortenRepository.Object;
-        _service = new UrlShortenerService(logger, httpContextAccessor, repository);
+        var sequenceRepository = _sequenceRepository.Object;
+        _service = new UrlShortenerService(logger, httpContextAccessor, repository, sequenceRepository);
     }
 
     /// <summary>
@@ -34,7 +36,7 @@ public class UrlShortenerServiceTest
     public async Task ShortenUrl_InvalidUrl_ReturnsException(string invalidUrl)
     {
         // Act 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _service.ShortenUrlAsync(invalidUrl!));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _service.ShortenUrlAsync(invalidUrl));
         
         // Assert
         Assert.Equal("Invalid URL to shorten. (Parameter 'longUrl')", exception.Message);
@@ -76,8 +78,7 @@ public class UrlShortenerServiceTest
             }
         };
         _httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
-        _shortenRepository.Setup(x => x.GetByLongUrlAsync(url)).ReturnsAsync(default(ShortenEntity?));
-        _shortenRepository.Setup(x => x.GetNextIdAsync()).ReturnsAsync(1);
+        _shortenRepository.Setup(x => x.GetByLongUrlAsync(url)).ReturnsAsync(default(Shorten?));
 
         // Act
         var result = await _service.ShortenUrlAsync(url);
@@ -109,12 +110,11 @@ public class UrlShortenerServiceTest
         var urlComplete = new Uri(url).ToString();
         
         _httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
-        _shortenRepository.Setup(x => x.GetByLongUrlAsync(urlComplete)).ReturnsAsync(default(ShortenEntity?));
-        _shortenRepository.Setup(x => x.GetNextIdAsync()).ReturnsAsync(1);
+        _shortenRepository.Setup(x => x.GetByLongUrlAsync(urlComplete)).ReturnsAsync(default(Shorten?));
 
         // Act
         var firstResult = await _service.ShortenUrlAsync(url);
-        _shortenRepository.Setup(x => x.GetByLongUrlAsync(urlComplete)).ReturnsAsync(new ShortenEntity(urlComplete, 1, firstResult.AbsolutePath));
+        _shortenRepository.Setup(x => x.GetByLongUrlAsync(urlComplete)).ReturnsAsync(new Shorten(urlComplete, 1, firstResult.AbsolutePath));
         var secondResult = await _service.ShortenUrlAsync(url);
 
         // Assert
@@ -171,7 +171,7 @@ public class UrlShortenerServiceTest
         _httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
         var shortenedUri = await _service.ShortenUrlAsync(longUrl);
         var shortCode = shortenedUri.Segments.Last();
-        _shortenRepository.Setup(x => x.GetByShortCodeAsync(shortCode)).ReturnsAsync(new ShortenEntity(longUrl, 1, shortCode));
+        _shortenRepository.Setup(x => x.GetByShortCodeAsync(shortCode)).ReturnsAsync(new Shorten(longUrl, 1, shortCode));
 
         // Act
         var result = await _service.GetLongUrlAsync(shortCode);

@@ -1,6 +1,6 @@
 namespace UrlShortener.WebApi.Entities.Shorten;
 
-public sealed class ShortenEntity(string longUrl, long hashId, string shortCode) : EntityBase
+public sealed class Shorten(string longUrl, long hashId, string shortCode) : EntityBase
 {
     public string LongUrl { get; private set; } = longUrl;
 

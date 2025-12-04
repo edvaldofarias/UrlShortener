@@ -20,16 +20,16 @@ export let options = {
     scenarios: {
         create_url: {
             executor: 'constant-vus',
-            vus: 50,
-            duration: '2m',
+            vus: 1000,
+            duration: '5m',
             exec: 'createUrl',
         },
         read_url: {
             executor: 'per-vu-iterations',
-            vus: 50,
-            iterations: 20,
+            vus: 1000,
+            iterations: 30,
             startTime: '15s',
-            maxDuration: '2m',
+            maxDuration: '10m',
             exec: 'readUrl'
         },
     },
