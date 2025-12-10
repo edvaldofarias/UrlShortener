@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 using UrlShortener.WebApi.Entities.Shorten;
@@ -15,6 +16,7 @@ public class UrlShortenerServiceTest
     private readonly Mock<ISequenceRepository> _sequenceRepository = new();
     private readonly Mock<IHttpContextAccessor> _httpContextAccessor = new();
     private readonly Mock<IShortenRepository> _shortenRepository = new();
+    private readonly Mock<IMemoryCache> _memoryCache = new();
 
     public UrlShortenerServiceTest()
     {
@@ -22,7 +24,13 @@ public class UrlShortenerServiceTest
         var logger = _logger.Object;
         var repository = _shortenRepository.Object;
         var sequenceRepository = _sequenceRepository.Object;
-        _service = new UrlShortenerService(logger, httpContextAccessor, repository, sequenceRepository);
+        var memoryCache = _memoryCache.Object;
+        _service = new UrlShortenerService(
+            logger, 
+            httpContextAccessor, 
+            repository, 
+            sequenceRepository, 
+            memoryCache);
     }
 
     /// <summary>
@@ -169,8 +177,11 @@ public class UrlShortenerServiceTest
             }
         };
         _httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+        object? shorten = null;
+        _memoryCache.Setup(x => x.TryGetValue(It.IsAny<long>(), out shorten))
+            .Returns(false);
         var shortenedUri = await _service.ShortenUrlAsync(longUrl);
-        var shortCode = shortenedUri.Segments.Last();
+        var shortCode = shortenedUri.Segments[^1];
         _shortenRepository.Setup(x => x.GetByShortCodeAsync(shortCode)).ReturnsAsync(new Shorten(longUrl, 1, shortCode));
 
         // Act

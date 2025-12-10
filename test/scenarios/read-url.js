@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE_URL = 'http://localhost:5001';
+const BASE_URL = 'http://localhost';
 
 // setup() roda antes dos VUs e retorna dados para todas as VUs
 export function setup() {
@@ -35,5 +35,5 @@ export default function (data) {
 
   check(res, { 'status é 404 ou redirect': (r) => r.status === 404 || [301,302,307,308].includes(r.status) });
 
-  sleep(1);
+  sleep(0.2);
 }

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using UrlShortener.WebApi.Entities.Shorten;
 using UrlShortener.WebApi.Helpers;
 using UrlShortener.WebApi.Infra.Repositories.Interfaces;
@@ -9,7 +10,8 @@ public class UrlShortenerService(
     ILogger<UrlShortenerService> logger,
     IHttpContextAccessor httpContextAccessor,
     IShortenRepository shortenRepository,
-    ISequenceRepository sequenceRepository) : IUrlShortenerService
+    ISequenceRepository sequenceRepository,
+    IMemoryCache memoryCache) : IUrlShortenerService
 {
     public async Task<Uri> ShortenUrlAsync(string longUrl)
     {
@@ -47,7 +49,19 @@ public class UrlShortenerService(
         ArgumentNullException.ThrowIfNull(shortCode);
 
         var hashId = Base62Helper.Decode(shortCode);
-        var entity = await shortenRepository.GetByShortCodeAsync(shortCode);
+
+        if (memoryCache.TryGetValue(hashId, out Shorten? entity))
+        {
+            logger.LogInformation("Cache hit for short URL {ShortUrl}", shortCode);
+        } 
+        else
+        {
+            logger.LogWarning("Shorten not found: {ShortCode}", shortCode);
+            entity = await shortenRepository.GetByShortCodeAsync(shortCode);
+            memoryCache.Set(hashId, entity, new  MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromMinutes(2)));
+        }
+        
         if (entity != null)
         {
             logger.LogInformation("Redirecting short URL {ShortUrl} to {LongUrl}", hashId, entity.LongUrl);

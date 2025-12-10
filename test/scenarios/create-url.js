@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE_URL = 'http://localhost:5001';
+const BASE_URL = 'http://localhost';
 
 export default function() {
   const url = BASE_URL + '/api/shorten';
@@ -12,5 +12,5 @@ export default function() {
 
   check(res, { 'status é 201': (r) => r.status === 201 });
 
-  sleep(1);
+  sleep(0.2);
 }

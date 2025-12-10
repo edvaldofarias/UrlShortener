@@ -1,4 +1,5 @@
 # UrlShortener
+
 URL shortener em .NET e com Angular com foco em alta escala, performance e arquitetura moderna.
 
 ## 🎯 Objetivo
@@ -85,13 +86,13 @@ Para executar os testes de carga, utilize o seguinte comando no terminal, depend
 #### 🔹 Usando K6 instalado localmente
 
 ```bash
-k6 run test/test.js
+k6 run test/index.js
 ```
 
 #### 🔹 Usando K6 via Docker
 
 ```bash
-docker run -i loadimpact/k6 run - < tests/test.js
+docker run -i loadimpact/k6 run - < test/index.js
 ```
 
 ### 📊 Analisando Resultados
@@ -104,3 +105,25 @@ Após a execução dos testes, o K6 fornecerá um resumo detalhado do desempenho
 - Uso de rede e erros (http_req_failed)
 
 Essas métricas ajudarão a identificar gargalos e otimizar a aplicação para melhor desempenho sob carga.
+
+## Executar em Docker
+
+Para executar o projeto usando Docker, siga os passos abaixo:
+
+1. Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina.
+
+2. Navegue até o diretório raiz do projeto onde o arquivo `docker-compose.yml` está localizado.
+
+3. Execute o seguinte comando para iniciar os serviços:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+   Para escalar o serviço webapi para múltiplas instâncias, você pode usar o seguinte comando:
+
+   ```bash
+      docker-compose up --build --scale webapi=3
+   ```
+
+4. A aplicação estará disponível em `http://localhost` (ou na porta que você configurou).
