@@ -19,9 +19,12 @@ jobs:
 
       - name: Restaurar dependências
         run: dotnet restore
+        working-directory: backend
 
       - name: Build da aplicação
         run: dotnet build --no-restore --configuration Release
+        working-directory: backend
 
       - name: Rodar testes
         run: dotnet test --no-build --configuration Release
+        working-directory: backend
