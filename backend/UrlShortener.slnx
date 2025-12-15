@@ -1,0 +1,22 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/SolutionItems/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="docker-compose.yml" />
+    <File Path="global.json" />
+    <File Path="nuget.config" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/UrlShortener.WebApi/UrlShortener.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/UrlShortener.WebApi.UnitTest/UrlShortener.WebApi.UnitTest.csproj" />
+  </Folder>
+</Solution>
