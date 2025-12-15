@@ -18,6 +18,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUrlShortenerService, UrlShortenerService>();
 builder.Services.AddScoped<IShortenRepository, ShortenRepository>();
 builder.Services.AddScoped<ISequenceRepository, SequenceRepository>();
+builder.Services.AddMemoryCache(options =>
+{    
+    options.ExpirationScanFrequency = TimeSpan.FromSeconds(30);
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -25,9 +29,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var configPostgre = new Npgsql.NpgsqlConnectionStringBuilder(connectionString)
 {
     Pooling = true,
-    MinPoolSize = 5,
-    MaxPoolSize = 40,
-    ConnectionIdleLifetime = 300, // segundos
+    MinPoolSize = 2,
+    MaxPoolSize = 8,
+    ConnectionIdleLifetime = 100, // segundos
     Timeout = 15 // tempo de abertura de conexão
 };
 
